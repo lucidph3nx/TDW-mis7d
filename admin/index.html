@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+<head>
+  <title>Mis7b forms - Admin</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="js/jquery-1.10.2.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+</head>
+<body onload=""  style="height: 100%; overflow-y:hidden;">
+<div class="text-center"  style="height: 100%;margin:0 !important; border:0 !important;">   
+
+	<form role="form-inline" style="margin-bottom:4px;margin-top:6px;box-sizing: border-box; " onsubmit="return false;">
+		<input type="text" value="" class="form-control input-lg" id="service" placeholder="Service number" style="display: inline !important; box-sizing: border-box; margin-left: 10px; margin-right: 10px; width: calc(184px);">
+		<input type="date" value="" class="form-control input-lg" id="date" placeholder="dd/mm/yyyy" style="display: inline !important; box-sizing: border-box; margin-left: 10px; margin-right: 10px; width: calc(190px);">
+		<input type="button" class="form-control input-lg btn btn-primary" onclick="searchForm();" id="search" value="SHOW FORM(S)" style="display: inline !important;margin-top:0px;box-sizing: border-box;margin-left: 10px;margin-right: 10px;width: calc(142px);margin-bottom: 5px;height: 44px;padding-top: 10px;padding-bottom: 10px;">
+		<div  style="display: inline !important;" id="buttoncontainer"></div>
+	</form>
+	<hr style="margin:0 !important;">
+	<div style="height:calc(100% - 58px);">
+		<iframe src="" id="myiframe" style="border:0px;width:100%;height:100%; overflow-y: scroll;"></iframe>
+	</div>
+</div>
+
+<script>
+
+// list of mis7d forms and their relevant details for search
+let mis7dForms = [
+	{
+		formName: 'mis7d_hvl',
+		formId: '3176601',
+		fieldDate: '68288278',
+		fieldServiceId: '68288285',
+		url: 'https://transdev.formstack.com/forms/mis7d_hvl',
+	},
+	{
+		formName: 'mis7d_jvl',
+		formId: '3176407',
+		fieldDate: '68281600',
+		fieldServiceId: '68281607',
+		url: 'https://transdev.formstack.com/forms/mis7d_jvl',
+	},
+	{
+		formName: 'mis7d_kpl',
+		formId: '3176657',
+		fieldDate: '68290348',
+		fieldServiceId: '68290355',
+		url: 'https://transdev.formstack.com/forms/mis7d_kpl',
+	},
+	{
+		formName: 'mis7d_mel',
+		formId: '3176577',
+		fieldDate: '68287623',
+		fieldServiceId: '68287630',
+		url: 'https://transdev.formstack.com/forms/mis7d_mel',
+	},
+	{
+		formName: 'mis7d_wrl',
+		formId: '3176667',
+		fieldDate: '68290727',
+		fieldServiceId: '68290734',
+		url: 'https://transdev.formstack.com/forms/mis7d_wrl',
+	},
+];
+
+	let lineAssociations4digit = {
+		WRL: ['16', 'MA'],
+		HVL: ['26', '36', '38', '39', '46', '49', 'PT', 'TA', 'TN', 'UH', 'WA'],
+		MEL: ['56', '59', 'ML'],
+		KPL: ['60', '62', '63', '64', '69', '72', '79', '82', '89', 'PA', 'PM', 'PU', 'PL', 'TW', 'WK'],
+		JVL: ['92', '93', '99', 'JV'],
+	};	
+	let lineAssociations3digit = {
+		WRL: ['F'],
+	};
+
+	function getFormDetail(serviceId){
+		let formDetail = {};
+		if (serviceId.length == 4) {
+			let serviceHeader = serviceId.substring(0, 2);
+			if (lineAssociations4digit.WRL.includes(serviceHeader)) {
+				formDetail = mis7dForms[4]
+			} else if (lineAssociations4digit.HVL.includes(serviceHeader)) {
+				formDetail = mis7dForms[0]
+			} else if (lineAssociations4digit.MEL.includes(serviceHeader)) {
+				formDetail = mis7dForms[3]
+			} else if (lineAssociations4digit.KPL.includes(serviceHeader)) {
+				formDetail = mis7dForms[2]
+			} else if (lineAssociations4digit.JVL.includes(serviceHeader)) {
+				formDetail = mis7dForms[1]
+			};
+		} else if (serviceId.length == 3) {
+            let serviceHeader = serviceId.substring(0, 1);
+            if (lineAssociations4digit.WRL.includes(serviceHeader)) {
+                formDetail = mis7dForms[4]
+            };
+        }
+		return formDetail
+	}
+
+function searchForm()
+{
+	$("#buttoncontainer")[0].innerHTML = '';
+	$("#myiframe")[0].src = "";
+
+	serviceId = $("#service").val();
+	date = $("#date").val().substr(8,2) + "/" + $("#date").val().substr(5,2) + "/" + $("#date").val().substr(0,4);
+
+	let formDetail = getFormDetail(serviceId)
+
+	if (formDetail == {}) {
+		alert("This service number is not supported by the application. Please check the service number entered.");
+	} else {
+		//load form data
+		$.ajax(	{
+			type: 'GET',
+			url: "https://cors-anywhere.herokuapp.com/https://www.formstack.com/api/v2/form/"+formDetail.formId+"/submission.json",
+			headers: {"Authorization" : "Bearer 4b6ae79522717d07c6bc28e416b611a2"},
+			contentType: 'application/json; charset=utf-8',
+			dataType: 'json',
+			data: {
+					"search_field_1": formDetail.fieldServiceId,
+					"search_value_1": serviceId,
+					"search_field_2": formDetail.fieldDate,
+					"search_value_2": date,
+					"data":1
+					}
+		}).then(function(data) {
+			displayForm(data, formDetail, serviceId, date);
+		});
+	}
+}
+
+function displayForm(data, formDetail, serviceId, date) {
+
+	//console.log(data.submissions[0].data);
+	var buttonIndex = 1;
+	var iframeURL;
+	for(var i =0; i < data.submissions.length; i++)
+	{
+		iframeURL = formDetail.url+ '?fromAdmin=fromAdmin&serviceId=' + serviceId
+
+		if(data.submissions[i].data[formDetail.fieldServiceId].value != serviceId || data.submissions[i].data[formDetail.fieldDate].value != date)
+			continue;
+		for (let [key, value] of Object.entries(data.submissions[i].data)) {
+			iframeURL += "&field" + value.field + "=" + encodeURIComponent(value.value);
+
+		}
+		
+		$("#buttoncontainer")[0].innerHTML += '<input type="button" class="btn " onclick="$(\'#myiframe\')[0].src = \''+iframeURL+'\';" value="'+(buttonIndex)+'"  style="display: inline !important;margin-top:0px;box-sizing: border-box;margin-left: 10px;margin-right: 10px;margin-bottom: 5px;height: 30px;padding-top: 3px;padding-bottom: 10px;">';
+		buttonIndex++;
+	}
+	if(buttonIndex == 1) {
+		alert("Error: no form was submitted with these parameters.");
+		return;
+	}
+	if(buttonIndex == 2) {
+		$("#myiframe")[0].src = iframeURL;
+	}
+}
+
+$(document).ready(function() {
+
+});
+</script>
+
+</body>
+</html>

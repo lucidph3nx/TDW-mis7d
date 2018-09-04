@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mis7d forms</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="js/jquery-1.10.2.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+	<script type="text/javascript">
+	function searchForm() {
+        let lineAssociations4digit = {
+            WRL: ['16', 'MA'],
+            HVL: ['26', '36', '38', '39', '46', '49', 'PT', 'TA', 'TN', 'UH', 'WA'],
+            MEL: ['56', '59', 'ML'],
+            KPL: ['60', '62', '63', '64', '69', '72', '79', '82', '89', 'PA', 'PM', 'PU', 'PL', 'TW', 'WK'],
+            JVL: ['92', '93', '99', 'JV'],
+        };	
+        let lineAssociations3digit = {
+            WRL: ['F'],
+        };	
+        //if($('#search').val().length == 4) return;
+        let serviceId = $('#search').val();
+        
+        if (serviceId.length == 4) {
+            let serviceHeader = serviceId.substring(0, 2);
+            if (lineAssociations4digit.WRL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_wrl?serviceId='+serviceId; return;}
+            } else if (lineAssociations4digit.HVL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_hvl?serviceId='+serviceId; return;}
+            } else if (lineAssociations4digit.MEL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_mel?serviceId='+serviceId; return;}
+            } else if (lineAssociations4digit.KPL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_kpl?serviceId='+serviceId; return;}
+            } else if (lineAssociations4digit.JVL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_jvl?serviceId='+serviceId; return;}
+            } else {
+                alert("This service number is not supported by the application. Please check the service number entered.");
+            };
+        }
+        else if (serviceId.length == 3) {
+            let serviceHeader = serviceId.substring(0, 1);
+            if (lineAssociations4digit.WRL.includes(serviceHeader)) {
+                {document.location = 'https://transdev.formstack.com/forms/mis7d_wrl?serviceId='+serviceId; return;}
+            } else {
+                alert("This service number is not supported by the application. Please check the service number entered.");
+            };
+        }
+        else {
+            alert("This service number is not supported by the application. Please check the service number entered.");
+        }
+	}
+	</script>
+</head>
+
+<body onload="">
+
+<style>
+body {
+	background: url(img/background.jpg) no-repeat center center fixed;
+	-webkit-background-size: contain;
+	-moz-background-size: contain;
+	-o-background-size: contain;
+	background-size: contain;
+}
+</style>
+
+<div class="text-center">   
+	<div style="font-size:75px">
+	<div id="clock" style="position:fixed;width:100%;top:0px;height:115px;background-color:white">Mis7d</div>
+	</div>
+
+	<form role="form">
+			<div class="form-group">
+			  <input type="text" class="form-control input-lg" id="search" placeholder="Enter service number" style="padding: 6px 10px; display: inline !important;margin-top:115px; border: 2px solid #f00; box-sizing: border-box; margin-left: 0px; margin-right: 0px; width: calc(100% - 120px); ">
+			  <input type="button" class="form-control input-lg btn btn-primary" onclick="searchForm();" id="search" value="GO" style="display: inline !important;margin-top:0px;box-sizing: border-box;margin-left: 10px;margin-right: 0px;width: calc(65px);margin-bottom: 5px;height: 44px;padding-top: 10px;padding-bottom: 10px;   background-color: #dc0404 !important; border-color: #dc0404 !important;">
+			</div>
+	</form>
+
+	<div id="results"></div>
+	<div id="timetableupdated" style="font-size:10px" ></div>
+
+</div>	</body>
+	
+</div>
+
+</body>
+</html>
